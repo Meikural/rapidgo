@@ -1,0 +1,4 @@
+01. build module by module
+02. publish empty repo
+03. first pull it first
+04. command line arguments to generate the strict folder structure
