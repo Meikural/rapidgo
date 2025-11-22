@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -36,10 +37,15 @@ func createNewProject(appName string) error {
 	}
 	fmt.Println("✓ Generated files")
 
+	// Run go get to fetch dependencies
+	if err := runGoGet(appName); err != nil {
+		return err
+	}
+	fmt.Println("✓ Fetched dependencies")
+
 	// Print next steps
 	fmt.Printf("\nNext steps:\n")
 	fmt.Printf("  cd %s\n", appName)
-	fmt.Printf("  go mod tidy\n")
 	fmt.Printf("  go run main.go\n")
 	fmt.Printf("\nVisit http://localhost:8080\n")
 
@@ -98,6 +104,16 @@ func generateFiles(appName string) error {
 func writeFile(path, content string) error {
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write file %s: %w", path, err)
+	}
+	return nil
+}
+
+func runGoGet(appName string) error {
+	cmd := exec.Command("go", "get", "github.com/meikural/rapidgo@latest")
+	cmd.Dir = appName
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to run go get: %w\nOutput: %s", err, string(output))
 	}
 	return nil
 }
