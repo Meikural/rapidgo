@@ -1,0 +1,15 @@
+package main
+
+import (
+	"[APPNAME]/app/logic"
+	rg "github.com/meikural/rapidgo"
+)
+
+func main() {
+	router := rg.New()
+
+	router.GET("/").
+		Hello()
+
+	router.Start(":8080")
+}

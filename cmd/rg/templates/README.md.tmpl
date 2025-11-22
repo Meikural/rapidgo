@@ -1,0 +1,42 @@
+# [APPNAME]
+
+RapidGo API Application
+
+## Getting Started
+
+1. Install dependencies:
+```bash
+   go mod tidy
+```
+
+2. Run the app:
+```bash
+   go run main.go
+```
+
+3. Visit http://localhost:8080
+
+## Project Structure
+
+- `app/logic/` - Chainable logic functions
+- `app/models/` - Data models
+- `app/services/` - Services
+- `config/` - Configuration
+- `db/migrations/` - Database migrations
+
+## Adding Custom Endpoints
+
+Create new files in `app/logic/`:
+```go
+func (r *rg.Route) MyLogic() *rg.Route {
+	return r.Use(func(c *rg.Ctx) *rg.Ctx {
+		// Your logic here
+		return c
+	})
+}
+```
+
+Then chain in `main.go`:
+```go
+router.GET("/endpoint").MyLogic()
+```

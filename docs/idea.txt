@@ -1,0 +1,222 @@
+RAPIDGO - FRAMEWORK BLUEPRINT SUMMARY
+=====================================
+
+RapidGo is a new Go framework designed for extremely fast API development using a 
+pipeline-based chaining architecture. It focuses on developer speed, minimal boilerplate, 
+modular logic blocks, and Rails-style CLI scaffolding — while staying idiomatic to Go.
+
+-------------------------------------------------------------
+1. CORE GOAL
+-------------------------------------------------------------
+RapidGo aims to provide:
+
+1. A Fiber-like, super simple syntax
+2. A chaining pipeline for handling requests
+3. A strict but clean folder structure (Rails-style)
+4. Modular logic blocks that developers can reuse
+5. A CLI tool to generate files and project skeletons
+6. Minimal boilerplate to rapidly build APIs
+
+RapidGo prioritizes developer freedom:
+- No forced validation DSL
+- No heavy ORMs or abstraction layers
+- All business logic lives inside logic functions
+- Error handling and validation are done inside logic blocks
+- RapidGo only manages routing, context, and pipeline execution
+
+-------------------------------------------------------------
+2. HIGH-LEVEL DESIGN
+-------------------------------------------------------------
+RapidGo is built around a simple concept:
+
+Every API route is a sequence of PipelineSteps:
+
+    GET("/calc").
+        AddUser("id").
+        ComputeData("x").
+        TransformResults().
+        RespondJSON()
+
+A PipelineStep is simply:
+    func(*Ctx) *Ctx
+
+The framework itself only provides:
+- Ctx (Request Context)
+- Route builder
+- Pipeline executor
+- Basic convenience functions (Auth, Role, RateLimit, JSON, etc.)
+
+The user writes all logic functions in /logic folder.
+
+-------------------------------------------------------------
+3. CURRENT STATUS (STAGE 1 COMPLETED)
+-------------------------------------------------------------
+We have already built and tested:
+
+✔️ RapidGo Go module initialized  
+✔️ Published empty module to GitHub  
+✔️ Verified `go get` works  
+✔️ Added Stage 1 core pipeline:  
+    - ctx.go  
+    - step.go  
+    - route.go  
+    - rapidgo.go  
+✔️ Created simple chaining pipeline  
+✔️ Confirmed test app can use RapidGo  
+✔️ External logic functions work  
+✔️ Can chain multiple logic functions  
+
+This proves the core architecture works.
+
+-------------------------------------------------------------
+4. PIPELINE ENGINE (CORE COMPONENTS)
+-------------------------------------------------------------
+RapidGo's core includes:
+
+Ctx:
+- Req, Res
+- Store map for logic-to-logic data passing
+- Result: final output
+- Status: http status
+- Err: error state
+- stop: short-circuit flag
+
+PipelineStep:
+    type PipelineStep func(*Ctx) *Ctx
+
+Route:
+- stores method, path, and pipeline steps
+- supports chaining via Use() or Logic() or future AddUser() etc.
+
+Executor:
+- iterates over pipeline steps sequentially
+- stops when ctx.stop == true
+- writes final response via http.ResponseWriter
+
+-------------------------------------------------------------
+5. LOGIC MODULE SYSTEM
+-------------------------------------------------------------
+Logic functions are written by the user:
+
+Example:
+
+    func AddUser(param string) PipelineStep {
+        return func(c *Ctx) *Ctx {
+            id := c.ParamInt(param)
+            c.Set("user_id", id)
+            return c
+        }
+    }
+
+They are imported in main.go:
+
+    rg.GET("/calc").
+        Logic(AddUser("id")).
+        Logic(ComputeData("x"))
+
+Goal: eventually support direct chaining without Logic():
+    rg.GET("/calc").AddUser("id").ComputeData("x")
+
+This requires CLI-generated Route extension methods.
+
+-------------------------------------------------------------
+6. CLI TOOL (UPCOMING)
+-------------------------------------------------------------
+CLI will be:
+
+    go install github.com/meikural/rapidgo/cmd/rg@latest
+
+Commands:
+
+    rg new appname
+    rg make:logic LogicName
+    rg make:controller Name
+    rg make:route Name
+    rg serve
+
+The first implemented generator will be:
+
+    rg make:logic LogicName
+
+This will create:
+
+logic/LogicName.go with boilerplate PipelineStep.
+
+-------------------------------------------------------------
+7. STRICT PROJECT STRUCTURE (RAILS-STYLE)
+-------------------------------------------------------------
+
+Project structure for RapidGo apps:
+
+myapp/
+│
+├── app/
+│   ├── controllers/
+│   ├── logic/
+│   ├── models/
+│   └── services/
+│
+├── config/
+│
+├── db/
+│   └── migrations/
+│
+├── public/
+│
+├── main.go
+└── go.mod
+
+RapidGo CLI will generate this structure automatically.
+
+-------------------------------------------------------------
+8. FUTURE MODULES (AFTER CORE)
+-------------------------------------------------------------
+Once the core engine is stable, RapidGo will add:
+
+1. Auth()        - JWT validation
+2. Role()        - RBAC step
+3. RateLimit()   - simple in-memory rate-limiting
+4. Cache()       - in-memory or redis-based caching
+5. JSON()        - standardized JSON response step
+6. Param helpers - c.Param(), c.ParamInt(), etc.
+7. Router groups - rg.Group("/api")
+8. Auto logic chaining via generated methods
+9. Project scaffolding via CLI
+10. SQL helpers - optional lightweight query utilities
+
+-------------------------------------------------------------
+9. DEVELOPMENT STRATEGY (AGILE)
+-------------------------------------------------------------
+RapidGo is developed in small stages:
+
+STAGE 0 — Publish empty module and test installation ✔  
+STAGE 1 — Implement core pipeline engine ✔  
+STAGE 2 — Add Logic() shorthand and Param helpers  
+STAGE 3 — Add common built-in steps (Auth, RateLimit, JSON)  
+STAGE 4 — Build CLI tool scaffolding  
+STAGE 5 — Add project generator  
+STAGE 6 — Add route-grouping and improved router  
+STAGE 7 — Add dynamic method injection (auto .AddUser())  
+STAGE 8 — Add DB utilities (optional)
+
+-------------------------------------------------------------
+10. PHILOSOPHY
+-------------------------------------------------------------
+RapidGo does NOT try to be a full Rails clone.
+
+Instead:
+
+- Clean Go code
+- Developer freedom
+- Simple pipeline engine
+- Small, fast, and friendly
+- Easy file generation
+- Logic-based development
+- High modularity
+- Chaining syntax everywhere
+
+This is the unique identity of RapidGo.
+
+-------------------------------------------------------------
+END OF DOCUMENT
+-------------------------------------------------------------
