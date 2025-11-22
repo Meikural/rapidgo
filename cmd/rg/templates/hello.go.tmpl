@@ -2,8 +2,9 @@ package logic
 
 import rg "github.com/meikural/rapidgo"
 
-func (r *rg.Route) Hello() *rg.Route {
-	return r.Use(func(c *rg.Ctx) *rg.Ctx {
+// This extends RouteBuilder (from rapidgo package)
+func (rb *rg.RouteBuilder) Hello() rg.Chainable {
+	return rb.Use(func(c *rg.Ctx) *rg.Ctx {
 		c.Result = "Hello, RapidGo!"
 		return c
 	})
